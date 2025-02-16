@@ -10,7 +10,7 @@ class HTTPServer(TCPServer):
     }
 
     headers = {
-        "Server": "WebSecure",
+        "Server": "Servidor da mariana linda",
         "Content-Type": "text/html", 
     }
 
@@ -38,10 +38,8 @@ class HTTPServer(TCPServer):
         if extra_headers:
             headers.update(extra_headers)
 
-        for header in headers.items():
-            print(header)
-
-            response_headers += header[0] + ': ' + header[1] + '\n\r'
+        for h in headers:
+            response_headers += '%s: %s\n\r' % (h, headers[h])
 
         return response_headers.encode()
           

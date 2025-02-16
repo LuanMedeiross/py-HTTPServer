@@ -13,7 +13,7 @@ class TCPServer:
         sock.bind((self.host, self.port))
         sock.listen(5)
 
-        print("Aguardando conexão em", sock.getsockname())
+        print("Servidor inicializado!")
 
         while True:
            
