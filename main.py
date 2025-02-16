@@ -29,7 +29,10 @@ class TCPServer:
         # Do whatever with the data
         return data
     
+class HTTPServer(TCPServer):
 
+    def handle_request(self, data):
+        return data
 
 if __name__ == "__main__":
 
