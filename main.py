@@ -12,15 +12,12 @@ class TCPServer:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((self.host, self.port))
         sock.listen(5)
-        
-        print("Listening at", sock.getsockname())
+
+        print("Aguardando conexão em", sock.getsockname)
 
         while True:
            
-            conn, addr = sock.accept()
-
-            print("Connected by", addr)
-
+            conn, _ = sock.accept()
             data = conn.recv(2048)
 
             response = self.handle_request(data)
