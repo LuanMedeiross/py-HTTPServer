@@ -1,4 +1,4 @@
-from tcp_server import TCPServer
+from server.tcp import TCPServer
 
 import os
 import json
