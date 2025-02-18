@@ -19,16 +19,18 @@ class HTTPServer(TCPServer):
     def handle_request(self, data):
 
         data = self.request_headers(data)
-        response = self.response_content(data)
+
         print(json.dumps(data, sort_keys=True, indent=4))
 
-        content = response[0]
-        status = response[1]
+        status = self.process_headers(data)
 
+        print("\nStatus code:", status)
+
+        response_content = self.response_content(data, status_code=status)
         response_line = self.response_line(status_code=status)
         response_headers = self.response_headers()
 
-        response = response_line + response_headers + content
+        response = response_line + response_headers + response_content
 
         return response
     
@@ -82,19 +84,25 @@ class HTTPServer(TCPServer):
 
         return data
 
-    def response_content(self, data):
+    def response_content(self, data, status_code):
 
         path = '.' + data["REQUEST"]["PATH"]
 
-        if not os.path.isfile(path):
-            return ['<h1>Not found 404<h1>'.encode(), 404] 
+        if status_code == 404:
+            return '<h1>Not found 404<h1>'.encode()
 
         file = open(path, 'r')    
         
-        return [file.read().encode() , 200]
+        return file.read().encode()
 
-    def process_headers(self, headers):
-        pass
+    def process_headers(self, data):
+        
+        path = '.' + data["REQUEST"]["PATH"]
+
+        if not os.path.isfile(path):
+            return 404 
+        
+        return 200
 
 
 if __name__ == "__main__":
