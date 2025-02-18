@@ -1,5 +1,7 @@
 from tcp import TCPServer
 
+import json
+
 class HTTPServer(TCPServer):
 
     status = {
@@ -9,19 +11,23 @@ class HTTPServer(TCPServer):
     }
 
     headers = {
-        "Server": "Servidor da mariana linda",
+        "Server": "WebSecure",
         "Content-Type": "text/html", 
     }
 
     def handle_request(self, data):
 
-        request = self.request_headers(data)
-        print(request)
+        data = self.request_headers(data)
+        response = self.response_content(data)
+        print(json.dumps(data, sort_keys=True, indent=4))
 
-        response_line = self.response_line(status_code=200)
+        content = response[0]
+        status = response[1]
+
+        response_line = self.response_line(status_code=status)
         response_headers = self.response_headers()
 
-        response = response_line + response_headers
+        response = response_line + response_headers + content
 
         return response
     
@@ -35,7 +41,7 @@ class HTTPServer(TCPServer):
         
         response_headers = ''
 
-        headers = self.headers.copy()
+        headers = HTTPServer.headers.copy()
 
         if extra_headers:
             headers.update(extra_headers)
@@ -43,15 +49,16 @@ class HTTPServer(TCPServer):
         for h in headers:
             response_headers += '%s: %s\n\r' % (h, headers[h])
 
+        response_headers += '\n\r'
+
         return response_headers.encode()
           
     def request_headers(self, data):
 
         request = data.decode().split("\r\n")
 
-        print(request)
-
         request_line = request[0].split()
+        headers = request[1:]
 
         data = {
             "REQUEST": {
@@ -65,13 +72,31 @@ class HTTPServer(TCPServer):
             }
         }
 
-        for req in request[1::]:
-            
-            if len(req) > 1:
-                req = req.split(': ')
-                data["headers"][req[0]] = req[1]
+        for header in headers:
+            if not header:
+                continue
+
+            key, value = header.split(': ')
+            data["headers"][key] = value
 
         return data
+
+    def response_content(self, data):
+
+        path = data["REQUEST"]["PATH"]
+
+        content = ''
+
+        try:
+            file = open('.' + path, 'r')
+        
+            content = [file.read().encode() , 200]
+        
+        except FileNotFoundError:
+            content = ['<h1>Not found 404<h1>'.encode(), 404] 
+        
+        return content
+
 
 if __name__ == "__main__":
 
