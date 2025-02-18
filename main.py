@@ -1,5 +1,6 @@
 from tcp import TCPServer
 
+import os
 import json
 
 class HTTPServer(TCPServer):
@@ -83,19 +84,17 @@ class HTTPServer(TCPServer):
 
     def response_content(self, data):
 
-        path = data["REQUEST"]["PATH"]
+        path = '.' + data["REQUEST"]["PATH"]
 
-        content = ''
+        if not os.path.isfile(path):
+            return ['<h1>Not found 404<h1>'.encode(), 404] 
 
-        try:
-            file = open('.' + path, 'r')
+        file = open(path, 'r')    
         
-            content = [file.read().encode() , 200]
-        
-        except FileNotFoundError:
-            content = ['<h1>Not found 404<h1>'.encode(), 404] 
-        
-        return content
+        return [file.read().encode() , 200]
+
+    def process_headers(self, headers):
+        pass
 
 
 if __name__ == "__main__":
