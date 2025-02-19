@@ -18,13 +18,8 @@ class HTTPServer(TCPServer):
 
     def handle_request(self, data):
 
-        data = self.parse_headers(data)
-
-        print(json.dumps(data, sort_keys=True, indent=4))
-
+        data = self.parse_headers(data)        
         status = self.process_headers(data)
-
-        print("Status code:", status, '\n')
 
         response_content = self.response_content(data, status_code=status)
         response_line = self.response_line(status_code=status)
@@ -32,6 +27,8 @@ class HTTPServer(TCPServer):
 
         response = response_line + response_headers + response_content
 
+        print(json.dumps(data, sort_keys=True, indent=4))
+        print("Status code:", status, '\n')
         print(response)
 
         return response
@@ -86,7 +83,10 @@ class HTTPServer(TCPServer):
 
         return data
 
-    def response_content(self, data, status_code):
+    def response_content(self, data, status_code, content = None):
+
+        if content:
+            return content.encode()
 
         path = '.' + data["REQUEST"]["PATH"]
 

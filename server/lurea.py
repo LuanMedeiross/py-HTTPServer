@@ -2,7 +2,11 @@ from server.http import HTTPServer
 
 class Lurea(HTTPServer):
 
-    routes = {}
+    def __init__(self, host, port, debug=False):
+        super().__init__(host, port)
+
+        self.routes = {}
+        self.debug = debug
 
     def run(self):
         self.start()
@@ -16,3 +20,4 @@ class Lurea(HTTPServer):
             print(self.routes)
 
         return wrapper
+
