@@ -13,8 +13,6 @@ class TCPServer:
         sock.bind((self.host, self.port))
         sock.listen(5)
 
-        print("Servidor inicializado!")
-
         while True:
            
             conn, _ = sock.accept()

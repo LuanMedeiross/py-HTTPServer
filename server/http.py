@@ -5,16 +5,20 @@ import json
 
 class HTTPServer(TCPServer):
 
-    status = {
-        200: 'OK',
-        404: 'Not Found',
-        403: 'Forbidden',
-    }
+    def __init__(self, host, port, debug):
+        super().__init__(host, port)
+        self.debug = debug
 
-    headers = {
-        "Server": "Lurea",
-        "Content-Type": "text/html", 
-    }
+        self.status = {
+            200: 'OK',
+            404: 'Not Found',
+            403: 'Forbidden',
+        }
+
+        self.headers = {
+            "Server": "Lurea",
+            "Content-Type": "text/html", 
+        }
 
     def handle_request(self, data):
 
@@ -27,14 +31,15 @@ class HTTPServer(TCPServer):
 
         response = response_line + response_headers + response_content
 
-        print(json.dumps(data, sort_keys=True, indent=4))
-        print("Status code:", status, '\n')
-        print(response)
+        if self.debug:
+            print(json.dumps(data, sort_keys=True, indent=4))
+            print("Status code:", status, '\n')
+            print(response)
 
         return response
     
     def response_line(self, status_code):
-        reason = HTTPServer.status[status_code]
+        reason = self.status[status_code]
         line = f'HTTP/1.1 {status_code} {reason}\n\r'
 
         return line.encode()
@@ -43,7 +48,7 @@ class HTTPServer(TCPServer):
         
         response_headers = ''
 
-        headers = HTTPServer.headers.copy()
+        headers = self.headers.copy()
 
         if extra_headers:
             headers.update(extra_headers)
