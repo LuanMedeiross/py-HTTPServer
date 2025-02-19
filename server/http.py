@@ -12,7 +12,7 @@ class HTTPServer(TCPServer):
     }
 
     headers = {
-        "Server": "WebSecure",
+        "Server": "Lurea",
         "Content-Type": "text/html", 
     }
 
@@ -91,7 +91,7 @@ class HTTPServer(TCPServer):
         path = '.' + data["REQUEST"]["PATH"]
 
         if status_code == 404:
-            return b'<h1>Not found 404<h1>'.encode()
+            return '<h1>Not found 404<h1>'.encode()
 
         file = open(path, 'r')    
         

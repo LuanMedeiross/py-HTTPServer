@@ -1,4 +1,4 @@
-from server.http import HTTPServer
+from server.lurea import Lurea
 
-server = HTTPServer("127.0.0.1", 3000)
+server = Lurea("127.0.0.1", 3000)
 server.start()
