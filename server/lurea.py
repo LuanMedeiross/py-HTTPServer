@@ -26,3 +26,33 @@ class Lurea(HTTPServer):
                 print(self.routes)
 
         return wrapper
+    
+    def handle_request(self, data):
+
+        data = self.parse_headers(data)        
+        status = self.process_headers(data)
+
+        response_content = self.response_content(data, status_code=status)
+        response_line = self.response_line(status_code=status)
+        response_headers = self.response_headers()
+
+        response = response_line + response_headers + response_content
+
+        return response
+    
+    def response_content(self, data, status_code, content=None):
+        if content:
+            return content.encode()
+
+        path = data["REQUEST"]["PATH"]
+        
+        if path in self.routes:
+            content = self.routes[path]().encode()            
+        else:
+            content = "<h1>Não encontrado 404</h1>".encode()
+
+        if self.debug:
+            print(self.routes)
+            print(path)
+
+        return content

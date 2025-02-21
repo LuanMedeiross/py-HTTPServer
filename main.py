@@ -6,7 +6,7 @@ app = Lurea("127.0.0.1", 3000, debug=True)
 def main():
     return "<h1>index</h1>"
 
-@app.route('teste')
+@app.route('/teste')
 def main():
     return "<h1>teste 123</h1>"
 

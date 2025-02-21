@@ -19,7 +19,6 @@ class TCPServer:
             data = conn.recv(2048)
 
             response = self.handle_request(data)
-
             conn.sendall(response)
             conn.close()
 
