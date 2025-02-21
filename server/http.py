@@ -37,15 +37,15 @@ class HTTPServer(TCPServer):
             print(response)
 
         return response
-    
+
     def response_line(self, status_code):
         reason = self.status[status_code]
         line = f'HTTP/1.1 {status_code} {reason}\n\r'
 
         return line.encode()
-    
+
     def response_headers(self, extra_headers = None):
-        
+
         response_headers = ''
 
         headers = self.headers.copy()
@@ -59,7 +59,7 @@ class HTTPServer(TCPServer):
         response_headers += '\n\r'
 
         return response_headers.encode()
-          
+
     def parse_headers(self, data):
 
         request = data.decode().split("\r\n")
@@ -99,14 +99,14 @@ class HTTPServer(TCPServer):
             return '<h1>Not found 404<h1>'.encode()
 
         file = open(path, 'r')    
-        
+
         return file.read().encode()
 
     def process_headers(self, data):
-        
+
         path = '.' + data["REQUEST"]["PATH"]
 
         if not os.path.isfile(path):
             return 404 
-        
+
         return 200

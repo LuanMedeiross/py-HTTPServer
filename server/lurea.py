@@ -6,7 +6,6 @@ class Lurea(HTTPServer):
         super().__init__(host, port, debug)
 
         self.routes = {}
-        
 
     def run(self):
 
@@ -56,3 +55,7 @@ class Lurea(HTTPServer):
             print(path)
 
         return content
+    
+def just_show_me_this(file_path):
+    with open(file_path, 'r') as file:
+        return file.read()
