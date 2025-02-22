@@ -23,5 +23,4 @@ class TCPServer:
             conn.close()
 
     def handle_request(self, data):
-        # Do whatever with the data, this is a subclass
         return data

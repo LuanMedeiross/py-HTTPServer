@@ -1,48 +1,31 @@
 from server.tcp import TCPServer
 
-import os
 import json
 
 class HTTPServer(TCPServer):
 
-    def __init__(self, host, port, debug):
-        super().__init__(host, port)
-        self.debug = debug
+    def __init__(self, host, port):
 
-        self.status = {
-            200: 'OK',
-            404: 'Not Found',
-            403: 'Forbidden',
-        }
+        super().__init__(host, port)
 
         self.headers = {
             "Server": "Lurea",
             "Content-Type": "text/html", 
         }
 
-    def handle_request(self, data):
-
-        data = self.parse_headers(data)        
-        status = self.process_headers(data)
-
-        response_content = self.response_content(data, status_code=status)
-        response_line = self.response_line(status_code=status)
-        response_headers = self.response_headers()
-
-        response = response_line + response_headers + response_content
-
-        if self.debug:
-            print(json.dumps(data, sort_keys=True, indent=4))
-            print("Status code:", status, '\n')
-            print(response)
-
-        return response
+        self.status_handlers = {
+            range(100, 200): "Informational",
+            range(200, 300): "Success",
+            range(300, 400): "Redirection",
+            range(400, 500): "Client Error",
+            range(500, 600): "Server Error",
+        }
 
     def response_line(self, status_code):
-        reason = self.status[status_code]
-        line = f'HTTP/1.1 {status_code} {reason}\n\r'
-
-        return line.encode()
+        reason = self.get_status(status_code)
+        line = f'HTTP/1.1 {status_code} {reason}\n\r'.encode()
+        
+        return line
 
     def response_headers(self, extra_headers = None):
 
@@ -55,28 +38,20 @@ class HTTPServer(TCPServer):
 
         for h in headers:
             response_headers += '%s: %s\n\r' % (h, headers[h])
-
         response_headers += '\n\r'
 
         return response_headers.encode()
 
-    def parse_headers(self, data):
+    def parse_headers(self, request):
 
-        request = data.decode().split("\r\n")
-
+        request = request.decode().split("\r\n")
         request_line = request[0].split()
         headers = request[1:]
 
-        data = {
-            "REQUEST": {
-                "METHOD": request_line[0],
-                "PATH": request_line[1],
-                "HTTP_V": request_line[2],
-            }, 
-
-            "headers": {
-
-            }
+        request = {
+            "METHOD": request_line[0],
+            "PATH": request_line[1],
+            "HTTP_V": request_line[2],
         }
 
         for header in headers:
@@ -84,29 +59,19 @@ class HTTPServer(TCPServer):
                 continue
 
             key, value = header.split(': ')
-            data["headers"][key] = value
+            request[key] = value
 
-        return data
+        # if self.debug:
+        #     print(json.dumps(request, indent=4))
 
-    def response_content(self, data, status_code, content = None):
+        return request
+    
+    def get_status(self, code):
+        for status_range, category in self.status_handlers.items():
+            if code in status_range:
+                return category
+        return "Unknown status code"
+    
+    def log(self, request, status):
+        print(request["METHOD"], '->', 'http://' + self.host + ':' + str(self.port) + request["PATH"], '-', status)
 
-        if content:
-            return content.encode()
-
-        path = '.' + data["REQUEST"]["PATH"]
-
-        if status_code == 404:
-            return '<h1>Not found 404<h1>'.encode()
-
-        file = open(path, 'r')    
-
-        return file.read().encode()
-
-    def process_headers(self, data):
-
-        path = '.' + data["REQUEST"]["PATH"]
-
-        if not os.path.isfile(path):
-            return 404 
-
-        return 200
