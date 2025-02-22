@@ -1,12 +1,28 @@
 from server.http import HTTPServer
 
+from pathlib import Path
+
 class Daddy(HTTPServer):
 
-    def __init__(self):
+    def __init__(self, _name_):
         self.routes = {}
         self.debug = False
+        
+        self.runner_path = Path(_name_).resolve()
+        self.root_path = self.runner_path.parent
+        self.template_path = self.root_path / "fuckend"
 
-    def run_bitch_run(self, 
+        self.STATUS_PAGES = {
+            400: "Bad request",
+            401: "Unauthorized",
+            403: self.gimme_that_damn_page('../server/response_templates/forbidden.html'),
+            404: self.gimme_that_damn_page('../server/response_templates/notfound.html'),
+            405: "Method not allowed",
+            500: self.gimme_that_damn_page('../server/response_templates/internalservererror.html'),
+        }
+
+    def run_bitch_run(
+            self, 
             host = "127.0.0.1", 
             port = 3000, 
             debug = False
@@ -15,7 +31,7 @@ class Daddy(HTTPServer):
         self.debug = debug
 
         print("Daddy's comming!")
-        print(host + ':' + str(port))
+        print('http://' + host + ':' + str(port))
 
         super().__init__(host, port)
         self.start()
@@ -46,16 +62,11 @@ class Daddy(HTTPServer):
     
     def response_content(self, request = {}, status = 200):
         
-        if status in STATUS_PAGES:
-            return STATUS_PAGES[status].encode()
+        if status in self.STATUS_PAGES:
+            return self.STATUS_PAGES[status].encode()
         
         path = request["PATH"]
-
         content = self.routes[path]["func"]()
-
-        # if self.debug:
-        #     print(self.routes)
-        #     print(path)
 
         return content.encode()
     
@@ -72,15 +83,10 @@ class Daddy(HTTPServer):
 
         return 200
     
-def gimme_that_damn_page(file_path):
-    with open(file_path, 'r') as file:
-        return file.read()
+    def gimme_that_damn_page(self, file_path):
 
-STATUS_PAGES = {
-    400: "Bad request",
-    401: "Unauthorized",
-    403: gimme_that_damn_page('./server/response_templates/forbidden.html'),
-    404: gimme_that_damn_page('./server/response_templates/notfound.html'),
-    405: "Method not allowed",
-    500: gimme_that_damn_page('./server/response_templates/internalservererror.html'),
-}
+        file_path = self.template_path / file_path
+
+        with open(file_path, 'r') as file:
+            return file.read()
+

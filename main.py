@@ -1,10 +1,10 @@
-from server.daddy import Daddy, gimme_that_damn_page
+from server.daddy import Daddy
 
-app = Daddy()
+app = Daddy(__name__)
 
 @app.right_here('/')
 def index():
-    return gimme_that_damn_page('index.html')
+    return app.gimme_that_damn_page('index.html')
 
 @app.right_here('/teste')
 def teste():
