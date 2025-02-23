@@ -1,17 +1,13 @@
 from server.tcp import TCPServer
 
-import json
-
 class HTTPServer(TCPServer):
 
     def __init__(self, host, port):
 
         super().__init__(host, port)
 
-        self.headers = {
-            "Server": "Lurea",
-            "Content-Type": "text/html", 
-        }
+        self.host = host
+        self.port = port
 
         self.status_handlers = {
             range(100, 200): "Informational",
@@ -27,15 +23,16 @@ class HTTPServer(TCPServer):
         
         return line
 
-    def response_headers(self, extra_headers = None):
+    def build_response_headers(self, content, content_type = "text/html"):
+
+        headers = {
+            "Content-Type": content_type,
+            "Content-Length": str(len(content)),
+            "Connection": "close",
+            "Server": "Daddy/1.0"
+        }
 
         response_headers = ''
-
-        headers = self.headers.copy()
-
-        if extra_headers:
-            headers.update(extra_headers)
-
         for h in headers:
             response_headers += '%s: %s\n\r' % (h, headers[h])
         response_headers += '\n\r'
@@ -72,6 +69,12 @@ class HTTPServer(TCPServer):
                 return category
         return "Unknown status code"
     
+    # def get_application_type(self, request: dict):
+    #     content_type = request.get("Accept")
+    #     print(content_type)
+
+    #     if "text/html" in content_type:
+    #         return "text/html"
+    
     def log(self, request, status):
         print(request["METHOD"], '->', 'http://' + self.host + ':' + str(self.port) + request["PATH"], '-', status)
-

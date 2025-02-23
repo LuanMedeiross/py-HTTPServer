@@ -1,25 +1,12 @@
 from server.http import HTTPServer
+from server.config import DaddyConfig
 
-from pathlib import Path
-
-class Daddy(HTTPServer):
+class Daddy(HTTPServer, DaddyConfig):
 
     def __init__(self, _name_):
         self.routes = {}
         self.debug = False
-        
-        self.runner_path = Path(_name_).resolve()
-        self.root_path = self.runner_path.parent
-        self.template_path = self.root_path / "fuckend"
-
-        self.STATUS_PAGES = {
-            400: "Bad request",
-            401: "Unauthorized",
-            403: self.gimme_that_damn_page('../server/response_templates/forbidden.html'),
-            404: self.gimme_that_damn_page('../server/response_templates/notfound.html'),
-            405: "Method not allowed",
-            500: self.gimme_that_damn_page('../server/response_templates/internalservererror.html'),
-        }
+        self._name_ = _name_
 
     def run_bitch_run(
             self, 
@@ -30,10 +17,9 @@ class Daddy(HTTPServer):
 
         self.debug = debug
 
-        print("Daddy's comming!")
-        print('http://' + host + ':' + str(port))
+        HTTPServer.__init__(self, host, port)
+        DaddyConfig.__init__(self, self._name_)
 
-        super().__init__(host, port)
         self.start()
 
     def right_here(self, path):
@@ -43,6 +29,8 @@ class Daddy(HTTPServer):
             if self.debug:
                 print(self.routes)
 
+            return func
+
         return wrapper
     
     def handle_request(self, request):
@@ -50,11 +38,11 @@ class Daddy(HTTPServer):
         req = self.parse_headers(request)        
         status = self.process_request(req)
 
-        response_content = self.response_content(req, status)
+        content = self.response_content(req, status)
         response_line = self.response_line(status_code=status)
-        response_headers = self.response_headers()
+        headers = self.build_response_headers(content)
 
-        response = response_line + response_headers + response_content
+        response = response_line + headers + content
 
         self.log(req, status)
 

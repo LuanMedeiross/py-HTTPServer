@@ -13,6 +13,8 @@ class TCPServer:
         sock.bind((self.host, self.port))
         sock.listen(5)
 
+        self.init_banner()
+
         while True:
            
             conn, _ = sock.accept()
@@ -24,3 +26,6 @@ class TCPServer:
 
     def handle_request(self, data):
         return data
+    
+    def init_banner(self):
+        print(f"Daddy's on http://{self.host}:{self.port}")
