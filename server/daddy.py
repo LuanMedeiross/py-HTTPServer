@@ -25,12 +25,9 @@ class Daddy(HTTPServer, DaddyConfig):
     def right_here(self, path):
         def wrapper(func, methods = ["GET"]):
             self.routes[path] = {"func": func, "methods": methods}
-
             if self.debug:
                 print(self.routes)
-
             return func
-
         return wrapper
     
     def handle_request(self, request):
@@ -46,17 +43,17 @@ class Daddy(HTTPServer, DaddyConfig):
 
         self.log(req, status)
 
-        return response
+        return response.encode("utf8")
     
     def response_content(self, request = {}, status = 200):
         
         if status in self.STATUS_PAGES:
-            return self.STATUS_PAGES[status].encode()
+            return self.STATUS_PAGES[status]
         
         path = request["PATH"]
         content = self.routes[path]["func"]()
 
-        return content.encode()
+        return content
     
     def process_request(self, request):
 
@@ -75,6 +72,6 @@ class Daddy(HTTPServer, DaddyConfig):
 
         file_path = self.template_path / file_path
 
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding="utf-8") as file:
             return file.read()
 
